@@ -1,0 +1,20 @@
+# Compiled Binary
+Presenter
+
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode / Swift
+build/
+.build/
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+
+# Editors
+.vscode/
+*.swp
+*~
