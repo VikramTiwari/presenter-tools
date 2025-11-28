@@ -30,12 +30,15 @@ jobs:
       - name: Build Application
         run: swiftc main.swift AppDelegate.swift Utils.swift -o Presenter
 
+      - name: Zip Application
+        run: zip Presenter.zip Presenter
+
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
           name: ${{ github.event.inputs.release_name }}
           draft: ${{ github.event.inputs.draft }}
-          files: Presenter
+          files: Presenter.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

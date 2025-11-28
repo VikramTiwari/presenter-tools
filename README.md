@@ -19,6 +19,14 @@ A macOS Menu Bar application designed to enhance your screen sharing and present
 
 ## Installation & Usage
 
+### Option A: Download Pre-built Release
+1. Go to the [Releases](../../releases) page.
+2. Download `Presenter.zip`.
+3. Unzip the file.
+4. Right-click `Presenter` and select **Open** (to bypass macOS Gatekeeper check).
+   - *Note*: If you see a "Permission Denied" error, run `chmod +x Presenter` in terminal.
+
+### Option B: Compile from Source
 1. **Compile the Application**:
    Open your terminal in the project directory and run:
    ```bash
