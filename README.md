@@ -47,9 +47,56 @@ A macOS Menu Bar application designed to enhance your screen sharing and present
 
 ## Future Roadmap
 
-Potential features planned for future updates:
+This roadmap is inspired by a feature comparison with **Screen Studio**, aiming to bring professional-grade presentation and recording capabilities to the Presenter app.
 
-- **Spotlight Mode**: Dim the entire screen except for a circle around your cursor to focus attention.
-- **Screen Annotation**: A "Pen" tool to draw on screen (circle items, draw arrows, underline text).
-- **Magnifying Glass**: A toggle to show a zoomed-in view of the area under the cursor.
-- **Webcam Overlay**: A floating, circular camera view of the presenter that stays on top of other windows.
+### 🚀 High Priority: Live Presentation Enhancements
+These features directly enhance the current "live aid" nature of the application.
+
+- [ ] **Smart Zoom / Magnifier**
+  - *Screen Studio Feature:* Automatic Zoom.
+  - *Goal:* Ability to toggle a "loupe" or zoomed-in view of the area under the cursor to show details during a presentation.
+- [ ] **Cursor Smoothing**
+  - *Screen Studio Feature:* Smooth Cursor Movement.
+  - *Goal:* Interpolate mouse movement to remove jitter and shakiness, making live demos look cinematic and professional.
+- [ ] **Spotlight Mode**
+  - *Screen Studio Feature:* Focus enhancement.
+  - *Goal:* Dim the entire screen except for a spotlight around the cursor to guide audience attention.
+- [ ] **Screen Annotations**
+  - *Screen Studio Feature:* Annotations and Markups.
+  - *Goal:* A "Pen" tool to draw on the screen (circles, arrows, underlines) over any application.
+- [ ] **Webcam Overlay (PiP)**
+  - *Screen Studio Feature:* Webcam Recording / PiP.
+  - *Goal:* A floating, circular, or rectangular camera view of the presenter that stays on top of other windows.
+
+### 📹 Medium Priority: Recording & Capture
+Expanding the app from a live tool to a content creation tool.
+
+- [ ] **Screen Recording**
+  - *Screen Studio Feature:* Flexible Recording Options (Full screen, window, region).
+  - *Goal:* Native ability to record the screen output to a file.
+- [ ] **Audio Capture**
+  - *Screen Studio Feature:* System Audio & Microphone Recording.
+  - *Goal:* Capture system sound (with noise reduction) and microphone input during recording.
+- [ ] **Mobile Device Mirroring**
+  - *Screen Studio Feature:* iOS Device Recording.
+  - *Goal:* Connect an iPhone/iPad via USB and mirror its screen into a floating window for mobile demos.
+
+### ✨ Low Priority: Post-Production & Polish
+Features for editing and refining content after capture.
+
+- [ ] **Automatic Motion Blur**
+  - *Screen Studio Feature:* Motion Blur.
+  - *Goal:* Add simulated motion blur to cursor movements and window transitions during recording or playback.
+- [ ] **Auto-Hide Static Cursor**
+  - *Screen Studio Feature:* Automatic Hiding of Static Cursor.
+  - *Goal:* Fade out the cursor when it hasn't moved for a few seconds to reduce clutter.
+- [ ] **Keyboard Shortcut History**
+  - *Screen Studio Feature:* Keyboard Shortcuts Display.
+  - *Goal:* Enhance the current "Keystroke Visualizer" to show a scrolling history of recent shortcuts, not just the active one.
+- [ ] **Background Wallpaper Replacement**
+  - *Screen Studio Feature:* Hide Desktop Icons / Custom Background.
+  - *Goal:* Instead of just hiding icons, overlay a solid color or custom wallpaper over the desktop background during presentation mode.
+
+### 🛠 Technical Improvements
+- [ ] **Export Options**: Support for GIF and MP4 export with customizable quality/framerate (if recording is implemented).
+- [ ] **Preset Management**: Save and load different configuration profiles (e.g., "Demo Mode", "Tutorial Mode").
