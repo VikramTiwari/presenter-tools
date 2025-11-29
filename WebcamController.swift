@@ -61,12 +61,7 @@ class WebcamController: NSObject {
             session.addInput(input)
         }
         
-        // Prompt for effects if needed
-        if #available(macOS 12.0, *) {
-            if !AVCaptureDevice.isPortraitEffectEnabled || !AVCaptureDevice.isStudioLightEnabled {
-                AVCaptureDevice.showSystemUserInterface(.videoEffects)
-            }
-        }
+        // Effects check moved to after startRunning
         
         self.captureSession = session
         
@@ -84,6 +79,18 @@ class WebcamController: NSObject {
         // 4. Start Session
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
+            
+            // Check effects AFTER session starts
+            if #available(macOS 12.0, *) {
+                DispatchQueue.main.async {
+                    let portrait = AVCaptureDevice.isPortraitEffectEnabled
+                    let studio = AVCaptureDevice.isStudioLightEnabled
+                    
+                    if !portrait || !studio {
+                        AVCaptureDevice.showSystemUserInterface(.videoEffects)
+                    }
+                }
+            }
         }
         
         if isAutoPositionEnabled {
@@ -131,9 +138,13 @@ class WebcamController: NSObject {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: circleSize, height: circleSize))
         view.wantsLayer = true
         view.wantsLayer = true
-        view.layer?.masksToBounds = true
-        view.layer?.borderWidth = 4
-        view.layer?.borderColor = NSColor.white.cgColor
+        view.layer?.masksToBounds = false // Allow shadow outside
+        
+        // Diffused Glow (Shadow)
+        view.layer?.shadowColor = NSColor.white.cgColor
+        view.layer?.shadowOpacity = 0.8 // Increased for better blend
+        view.layer?.shadowRadius = 20   // Increased for softer glow
+        view.layer?.shadowOffset = .zero
         
         if let layer = videoPreviewLayer {
             view.layer?.addSublayer(layer)
@@ -172,12 +183,32 @@ class WebcamController: NSObject {
         let currentOrigin = window.frame.origin
         window.setFrame(NSRect(origin: currentOrigin, size: newSize), display: true)
         
-        // Update View and Layer
+        // Update View and Layer (Shadow Shape)
         view.setFrameSize(newSize)
         view.layer?.cornerRadius = cornerRadius
         
-        // Update Preview Layer
+        // Update Preview Layer (Content Clipping & Mask)
         videoPreviewLayer?.frame = view.bounds
+        videoPreviewLayer?.cornerRadius = cornerRadius
+        videoPreviewLayer?.masksToBounds = true
+        
+        // Apply Gradient Mask for Circle
+        if currentShape == .circle {
+            let maskLayer = CAGradientLayer()
+            maskLayer.frame = view.bounds
+            maskLayer.type = .radial
+            maskLayer.colors = [
+                NSColor.black.cgColor, // Center (Opaque)
+                NSColor.black.cgColor, // Mid (Opaque)
+                NSColor.clear.cgColor  // Edge (Transparent)
+            ]
+            maskLayer.locations = [0.0, 0.95, 1.0] // Reduced fade area (was 0.85)
+            maskLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
+            maskLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
+            videoPreviewLayer?.mask = maskLayer
+        } else {
+            videoPreviewLayer?.mask = nil
+        }
         
         // If auto-position is active, we might need to re-check/re-animate position 
         // but for now let's just let the next mouse move handle it or leave it.
