@@ -10,6 +10,11 @@ PRESENTER_SOURCES = Presenter/main.swift \
 
 RECORDER_SOURCES = Recorder/main.swift \
 				   Recorder/AppDelegate.swift \
+				   Recorder/RecorderManager.swift \
+				   Recorder/ScreenRecorder.swift \
+				   Recorder/WebcamRecorder.swift \
+				   Recorder/AudioRecorder.swift \
+				   Recorder/InputRecorder.swift \
 				   Shared/Utils.swift
 
 all: build-presenter build-recorder
