@@ -8,6 +8,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var cursorHighlighter = CursorHighlighter()
     var keystrokeVisualizer = KeystrokeVisualizer()
     var webcamController = WebcamController()
+    var magnifyingGlass = MagnifyingGlass()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Setup Menu Bar
@@ -59,6 +60,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let keystrokeItem = NSMenuItem(title: "Keystroke Visualizer", action: #selector(toggleKeystrokes(_:)), keyEquivalent: "k")
         menu.addItem(keystrokeItem)
         
+        // --- Magnifying Glass Submenu ---
+        let zoomMenu = NSMenu()
+        
+        let zoomToggleItem = NSMenuItem(title: "Enable", action: #selector(toggleMagnifyingGlass(_:)), keyEquivalent: "z")
+        zoomToggleItem.state = .off
+        zoomMenu.addItem(zoomToggleItem)
+        
+        zoomMenu.addItem(NSMenuItem.separator())
+        
+        // Zoom Level
+        let zoomLevelMenu = NSMenu()
+        let levels: [(String, CGFloat)] = [("1.5x", 1.5), ("2x", 2.0), ("4x", 4.0)]
+        for (name, level) in levels {
+            let item = NSMenuItem(title: name, action: #selector(setZoomLevel(_:)), keyEquivalent: "")
+            item.representedObject = level
+            if level == 4.0 { item.state = .on }
+            zoomLevelMenu.addItem(item)
+        }
+        let zoomLevelItem = NSMenuItem(title: "Zoom Level", action: nil, keyEquivalent: "")
+        zoomLevelItem.submenu = zoomLevelMenu
+        zoomMenu.addItem(zoomLevelItem)
+        
+        // Zoom Size
+        let zoomSizeMenu = NSMenu()
+        let sizes: [(String, CGFloat)] = [("Small (200px)", 200), ("Medium (250px)", 250), ("Large (400px)", 400)]
+        for (name, size) in sizes {
+            let item = NSMenuItem(title: name, action: #selector(setZoomSize(_:)), keyEquivalent: "")
+            item.representedObject = size
+            if size == 400 { item.state = .on }
+            zoomSizeMenu.addItem(item)
+        }
+        let zoomSizeItem = NSMenuItem(title: "Size", action: nil, keyEquivalent: "")
+        zoomSizeItem.submenu = zoomSizeMenu
+        zoomMenu.addItem(zoomSizeItem)
+        
+        let magnifyingGlassItem = NSMenuItem(title: "Magnifying Glass", action: nil, keyEquivalent: "")
+        magnifyingGlassItem.submenu = zoomMenu
+        menu.addItem(magnifyingGlassItem)
+        
         // --- Webcam Overlay Submenu ---
         let webcamMenu = NSMenu()
         
@@ -99,12 +139,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             keystrokeItem.state = .on
             keystrokeVisualizer.start()
             
+            // Magnifying Glass is manual start to avoid potential launch crashes
+            // magnifyingGlass.start()
+            
             // Start Webcam features by default
             webcamController.toggleWebcam()
             webcamController.toggleAutoPosition()
         } else {
             cursorToggleItem.state = .off
             keystrokeItem.state = .off
+            zoomToggleItem.state = .off
         }
         
         // Initialize color
@@ -145,6 +189,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             keystrokeVisualizer.stop()
             sender.state = .off
+        }
+    }
+    
+    @objc func toggleMagnifyingGlass(_ sender: NSMenuItem) {
+        magnifyingGlass.toggle()
+        sender.state = magnifyingGlass.isRunning ? .on : .off
+    }
+    
+    @objc func setZoomLevel(_ sender: NSMenuItem) {
+        guard let level = sender.representedObject as? CGFloat else { return }
+        magnifyingGlass.zoomLevel = level
+        updateMenuState(sender)
+    }
+    
+    @objc func setZoomSize(_ sender: NSMenuItem) {
+        guard let size = sender.representedObject as? CGFloat else { return }
+        magnifyingGlass.size = size
+        updateMenuState(sender)
+    }
+    
+    private func updateMenuState(_ selected: NSMenuItem) {
+        guard let menu = selected.menu else { return }
+        for item in menu.items {
+            item.state = (item == selected) ? .on : .off
         }
     }
     
