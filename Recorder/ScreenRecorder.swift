@@ -2,6 +2,7 @@ import ScreenCaptureKit
 import AVFoundation
 import Cocoa
 import VideoToolbox
+import CoreGraphics
 
 class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
     private var stream: SCStream?
@@ -27,8 +28,19 @@ class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
                 
                 // Create a configuration
                 let streamConfig = SCStreamConfiguration()
-                streamConfig.width = display.width
-                streamConfig.height = display.height
+                
+                // Try to get the physical resolution of the display
+                if let mode = CGDisplayCopyDisplayMode(display.displayID) {
+                    streamConfig.width = mode.pixelWidth
+                    streamConfig.height = mode.pixelHeight
+                    print("ScreenRecorder: Detected native resolution: \(streamConfig.width)x\(streamConfig.height)")
+                } else {
+                    // Fallback to logical dimensions * 2 (assuming Retina) if native fails, or just logical
+                    streamConfig.width = display.width * 2
+                    streamConfig.height = display.height * 2
+                    print("ScreenRecorder: Fallback to 2x logical resolution: \(streamConfig.width)x\(streamConfig.height)")
+                }
+                
                 streamConfig.minimumFrameInterval = CMTime(value: 1, timescale: 60)
                 streamConfig.queueDepth = 5
                 streamConfig.pixelFormat = kCVPixelFormatType_32BGRA
@@ -38,10 +50,16 @@ class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
                 streamConfig.width = (streamConfig.width + 15) / 16 * 16
                 streamConfig.height = (streamConfig.height + 15) / 16 * 16
                 
+                print("ScreenRecorder: Final recording resolution: \(streamConfig.width)x\(streamConfig.height)")
+                
                 let videoSettings: [String: Any] = [
                     AVVideoCodecKey: AVVideoCodecType.h264,
                     AVVideoWidthKey: streamConfig.width,
-                    AVVideoHeightKey: streamConfig.height
+                    AVVideoHeightKey: streamConfig.height,
+                    AVVideoCompressionPropertiesKey: [
+                        AVVideoAverageBitRateKey: 20_000_000, // 20 Mbps for high quality
+                        AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
+                    ]
                 ]
                 
                 videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
