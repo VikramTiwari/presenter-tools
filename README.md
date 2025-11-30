@@ -27,21 +27,33 @@ A macOS Menu Bar application designed to enhance your screen sharing and present
    - *Note*: If you see a "Permission Denied" error, run `chmod +x Presenter` in terminal.
 
 ### Option B: Compile from Source
-1. **Compile the Application**:
+1. **Compile the Applications**:
    Open your terminal in the project directory and run:
    ```bash
-   swiftc main.swift AppDelegate.swift Utils.swift -o Presenter
+   make all
    ```
+   This will create two applications: `PresenterApp` and `RecorderApp`.
 
-2. **Run the Application**:
-   ```bash
-   ./Presenter
-   ```
-3. A menu bar icon (rectangle with person) will appear.
-4. Click the icon to access the menu:
-   - Toggle features on/off.
-   - Change the cursor color.
-   - Quit the application.
+2. **Run the Applications**:
+   - **Presenter Mode**:
+     ```bash
+     ./PresenterApp
+     ```
+   - **Recorder Mode**:
+     ```bash
+     ./RecorderApp
+     ```
+
+3. **Presenter App Features**:
+   - A menu bar icon (rectangle with person) will appear.
+   - Click the icon to access the menu:
+     - Toggle features on/off.
+     - Change the cursor color.
+     - Quit the application.
+
+4. **Recorder App Features**:
+   - A menu bar icon (record circle) will appear.
+   - Click the icon to access the menu.
 
 **Note**: The Keystroke Visualizer requires **Accessibility Permissions**. The app will prompt you to grant these permissions in System Settings if they are not already enabled.
 
