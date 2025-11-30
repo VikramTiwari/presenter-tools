@@ -99,6 +99,8 @@ class MagnifyingGlass: NSObject, SCStreamOutput {
         layer.cornerRadius = size / 2
         layer.masksToBounds = true
         layer.contentsGravity = .resizeAspectFill
+        layer.contentsScale = window.backingScaleFactor
+        layer.magnificationFilter = .nearest
         
         // Gradient Mask for Soft Edges
         let maskLayer = CAGradientLayer()
