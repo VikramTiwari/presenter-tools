@@ -13,14 +13,85 @@ class WebcamRecorder: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     func start(outputURL: URL) {
         print("WebcamRecorder: Start writing to \(outputURL.path)")
         
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            setupSession(outputURL: outputURL)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    self.setupSession(outputURL: outputURL)
+                }
+            }
+        case .denied, .restricted:
+            print("Camera access denied")
+        @unknown default:
+            break
+        }
+    }
+    
+    private func setupSession(outputURL: URL) {
+        captureSession.beginConfiguration()
+        
+        guard let videoDevice = AVCaptureDevice.default(for: .video),
+              let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+              captureSession.canAddInput(videoInput) else {
+            print("Failed to get video device or input")
+            captureSession.commitConfiguration()
+            return
+        }
+        
+        // Find highest resolution format
+        if let bestFormat = videoDevice.formats.max(by: {
+            CMVideoFormatDescriptionGetDimensions($0.formatDescription).width < CMVideoFormatDescriptionGetDimensions($1.formatDescription).width
+        }) {
+            do {
+                try videoDevice.lockForConfiguration()
+                videoDevice.activeFormat = bestFormat
+                videoDevice.unlockForConfiguration()
+            } catch {
+                print("WebcamRecorder: Failed to lock device for configuration: \(error)")
+            }
+        }
+        
+        captureSession.addInput(videoInput)
+        
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+            videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "com.recorder.webcamOutput"))
+        }
+        
+        captureSession.commitConfiguration()
+        
+        // Setup Writer with actual dimensions
+        let dimensions = CMVideoFormatDescriptionGetDimensions(videoDevice.activeFormat.formatDescription)
+        setupWriter(outputURL: outputURL, width: Int(dimensions.width), height: Int(dimensions.height))
+        
+        Task {
+            captureSession.startRunning()
+            print("WebcamRecorder: Session started")
+            
+            // Check effects
+            if #available(macOS 12.0, *) {
+                DispatchQueue.main.async {
+                    let portrait = AVCaptureDevice.isPortraitEffectEnabled
+                    let studio = AVCaptureDevice.isStudioLightEnabled
+                    
+                    if !portrait || !studio {
+                        AVCaptureDevice.showSystemUserInterface(.videoEffects)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func setupWriter(outputURL: URL, width: Int, height: Int) {
         do {
             videoWriter = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
             
-            // Note: Actual dimensions should be dynamic based on device, using 1280x720 as default
             let videoSettings: [String: Any] = [
                 AVVideoCodecKey: AVVideoCodecType.h264,
-                AVVideoWidthKey: 1280,
-                AVVideoHeightKey: 720
+                AVVideoWidthKey: width,
+                AVVideoHeightKey: height
             ]
             
             videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
@@ -34,48 +105,6 @@ class WebcamRecorder: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
             }
         } catch {
             print("Failed to setup webcam writer: \(error)")
-            return
-        }
-        
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            setupSession()
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted {
-                    self.setupSession()
-                }
-            }
-        case .denied, .restricted:
-            print("Camera access denied")
-        @unknown default:
-            break
-        }
-    }
-    
-    private func setupSession() {
-        captureSession.beginConfiguration()
-        
-        guard let videoDevice = AVCaptureDevice.default(for: .video),
-              let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
-              captureSession.canAddInput(videoInput) else {
-            print("Failed to get video device or input")
-            captureSession.commitConfiguration()
-            return
-        }
-        
-        captureSession.addInput(videoInput)
-        
-        if captureSession.canAddOutput(videoOutput) {
-            captureSession.addOutput(videoOutput)
-            videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "com.recorder.webcamOutput"))
-        }
-        
-        captureSession.commitConfiguration()
-        
-        Task {
-            captureSession.startRunning()
-            print("WebcamRecorder: Session started")
         }
     }
     

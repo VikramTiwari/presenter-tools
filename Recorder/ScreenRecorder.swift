@@ -33,12 +33,10 @@ class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
                 if let mode = CGDisplayCopyDisplayMode(display.displayID) {
                     streamConfig.width = mode.pixelWidth
                     streamConfig.height = mode.pixelHeight
-                    print("ScreenRecorder: Detected native resolution: \(streamConfig.width)x\(streamConfig.height)")
                 } else {
                     // Fallback to logical dimensions * 2 (assuming Retina) if native fails, or just logical
                     streamConfig.width = display.width * 2
                     streamConfig.height = display.height * 2
-                    print("ScreenRecorder: Fallback to 2x logical resolution: \(streamConfig.width)x\(streamConfig.height)")
                 }
                 
                 streamConfig.minimumFrameInterval = CMTime(value: 1, timescale: 60)
@@ -49,8 +47,6 @@ class ScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate {
                 // Ensure dimensions are multiples of 16 for better encoder compatibility
                 streamConfig.width = (streamConfig.width + 15) / 16 * 16
                 streamConfig.height = (streamConfig.height + 15) / 16 * 16
-                
-                print("ScreenRecorder: Final recording resolution: \(streamConfig.width)x\(streamConfig.height)")
                 
                 let videoSettings: [String: Any] = [
                     AVVideoCodecKey: AVVideoCodecType.h264,
@@ -135,21 +131,13 @@ class StreamOutput: NSObject, SCStreamOutput {
         
         if writer.status == .writing {
             if !sessionStarted {
-                print("StreamOutput: Starting session at \(CMSampleBufferGetPresentationTimeStamp(sampleBuffer))")
-                if let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) {
-                    print("StreamOutput: First frame format: \(formatDescription)")
-                }
                 writer.startSession(atSourceTime: CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
                 sessionStarted = true
             }
             
             if input.isReadyForMoreMediaData {
                 input.append(sampleBuffer)
-            } else {
-                print("StreamOutput: Input not ready for more media data")
             }
-        } else {
-            print("StreamOutput: Writer status is \(writer.status.rawValue) (error: \(String(describing: writer.error)))")
         }
     }
 }

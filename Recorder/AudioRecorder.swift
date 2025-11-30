@@ -18,9 +18,9 @@ class AudioRecorder: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate {
             
             let audioSettings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
-                AVSampleRateKey: 44100,
+                AVSampleRateKey: 48000,
                 AVNumberOfChannelsKey: 2,
-                AVEncoderBitRateKey: 128000
+                AVEncoderBitRateKey: 320000
             ]
             
             audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)

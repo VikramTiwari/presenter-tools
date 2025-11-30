@@ -27,12 +27,12 @@ class InputRecorder {
         }
         
         // Monitor global events (other apps)
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown]) { event in
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown, .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]) { event in
             self.handleEvent(event)
         }
         
         // Monitor local events (this app)
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown]) { event in
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown, .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]) { event in
             self.handleEvent(event)
             return event
         }
@@ -62,7 +62,7 @@ class InputRecorder {
         switch event.type {
         case .keyDown:
             eventData["keyCode"] = event.keyCode
-        case .leftMouseDown, .rightMouseDown:
+        case .leftMouseDown, .rightMouseDown, .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
             let location = NSEvent.mouseLocation
             eventData["x"] = location.x
             eventData["y"] = location.y

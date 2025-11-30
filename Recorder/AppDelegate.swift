@@ -7,18 +7,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create the status item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
-        if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "record.circle", accessibilityDescription: "Recorder")
-        }
+        updateMenu()
+    }
+    
+    func updateMenu() {
+        let isRecording = RecorderManager.shared.isRecording
         
-        constructMenu()
+        if let button = statusItem.button {
+            let imageName = isRecording ? "stop.circle" : "record.circle"
+            button.image = NSImage(systemSymbolName: imageName, accessibilityDescription: isRecording ? "Stop Recording" : "Start Recording")
+            
+            if isRecording {
+                button.action = #selector(stopRecording)
+                button.target = self
+                statusItem.menu = nil
+            } else {
+                button.action = nil // Clicking opens menu
+                constructMenu()
+            }
+        }
     }
     
     func constructMenu() {
         let menu = NSMenu()
         
         menu.addItem(NSMenuItem(title: "Start Recording", action: #selector(startRecording), keyEquivalent: "r"))
-        menu.addItem(NSMenuItem(title: "Stop Recording", action: #selector(stopRecording), keyEquivalent: "."))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         
@@ -27,9 +40,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func startRecording() {
         RecorderManager.shared.startRecording()
+        updateMenu()
     }
     
     @objc func stopRecording() {
         RecorderManager.shared.stopRecording()
+        updateMenu()
     }
 }
